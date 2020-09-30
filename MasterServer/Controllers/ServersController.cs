@@ -13,15 +13,15 @@ namespace MasterServer.Controllers
     public class ServersController : ControllerBase
     {
         private readonly ILogger<ServersController> _logger;
-        private readonly ServersDBRepository _repository;
+        private readonly DBRepository _repository;
 
-        public ServersController(ILogger<ServersController> logger, ServersDBRepository repository)
+        public ServersController(ILogger<ServersController> logger, DBRepository repository)
         {
             _logger = logger;
             _repository = repository;
         }
-
-        #region CoreRoutes
+#if false
+#region CoreRoutes
 
         [HttpGet]
         public async Task<Server[]> GetAll()
@@ -118,9 +118,9 @@ namespace MasterServer.Controllers
             }
         }
 
-        #endregion
+#endregion
 
-        #region Modify
+#region Modify
 
         [HttpPatch("{id:Guid}")]
         public async Task<Server> Modify(Guid id, [FromBody] ModifiedServer modifiedServer)
@@ -181,9 +181,9 @@ namespace MasterServer.Controllers
             }
         }
 
-        #endregion
+#endregion
 
-        #region GetRoutes
+#region GetRoutes
 
         [HttpGet("{id:Guid}/players")]
         public async Task<Player[]> GetPlayers(Guid id)
@@ -191,6 +191,8 @@ namespace MasterServer.Controllers
             return await _repository.GetPlayers(id);
         }
 
-        #endregion
+#endregion
+
+#endif
     }
 }
