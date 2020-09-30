@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 
 namespace MasterServer
 {
-    public class Player
+    public class ServerAndKey
     {
+        public Server Server { get; set; }
+        public Guid AdminKey { get; set; }
     }
 }
