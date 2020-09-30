@@ -26,12 +26,18 @@ namespace MasterServer
         }
 
         #region Player Database
+        public async Task<long> GetSize()
+        {
+            var players = await _playerCollection.Find(new BsonDocument()).CountDocumentsAsync();
+            return players;
+        }
 
         public async Task<Player[]> GetAllPlayers()
         {
             var players = await _playerCollection.Find(new BsonDocument()).ToListAsync();
             return players.ToArray();
         }
+
         public async Task<Player[]> GetAllMinScore(int minScore)
         {
             FilterDefinition<Player> filter = Builders<Player>.Filter.Gte(p => p.Score, minScore);
