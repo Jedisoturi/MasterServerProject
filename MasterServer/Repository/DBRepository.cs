@@ -17,7 +17,7 @@ namespace MasterServer
         public DBRepository()
         {
             var mongoClient = new MongoClient("mongodb://localhost:27017");
-            var database = mongoClient.GetDatabase("game");
+            var database = mongoClient.GetDatabase("masterserver");
             _playerCollection = database.GetCollection<Player>("players");
             _serverCollection = database.GetCollection<Server>("servers");
 
