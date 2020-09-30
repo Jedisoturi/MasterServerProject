@@ -47,6 +47,9 @@ namespace MasterServer.Controllers
                 newServer.HasPassword
             );
 
+            Guid adminKey = Guid.NewGuid();
+
+
             return await _repository.Create(server);
         }
 
