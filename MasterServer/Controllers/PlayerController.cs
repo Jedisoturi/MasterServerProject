@@ -62,6 +62,7 @@ namespace MasterServer
             Player player = new Player();
             player.Id = Guid.NewGuid();
             player.Name = name;
+            player.CreationTime = DateTime.Now;
             return await _repo.CreatePlayer(player);
         }
 
@@ -102,15 +103,15 @@ namespace MasterServer
         }
 
         [HttpGet("AvgPlayersPerLevel")]
-        public async Task<Player[]> GetAvgPlayersPerLevel()
+        public async Task<LevelCount[]> GetAvgPlayersPerLevel()
         {
             return await _repo.GetAvgPlayersPerLevel();
         }
 
         [HttpGet("top10")]
-        public async Task<Player[]> GetTop10Descending(int? minScore)
+        public async Task<Player[]> GetTop10(int? minScore)
         {
-            return await _repo.GetTop10Descending();
+            return await _repo.GetTop10();
         }
     }
 }

@@ -47,11 +47,17 @@ namespace MasterServer
 
         public async Task<Player[]> GetAllSortScore( )
         {
-            return null;
+            var sortDef = Builders<Player>.Sort.Descending(p => p.Score);
+            var players = await _playerCollection.Find(new BsonDocument()).Sort(sortDef).ToListAsync();
+
+            return players.ToArray();
         }
         public async Task<Player[]> GetAllSortDate()
         {
-            return null;
+            var sortDef = Builders<Player>.Sort.Descending(p => p.CreationTime);
+            var players = await _playerCollection.Find(new BsonDocument()).Sort(sortDef).ToListAsync();
+
+            return players.ToArray();
         }
         public Task<Player> GetPlayer(Guid id)
         {
@@ -104,26 +110,46 @@ namespace MasterServer
             Player player = await _playerCollection.FindOneAndUpdateAsync(filter, incrementLevelUpdate, options);
             return player;
         }
-        public async Task<Player[]> AddAchievement(Guid id, int index)
+        public async Task<Player> AddAchievement(Guid id, int index)
         {
-            return null;
+            FilterDefinition<Player> filter = Builders<Player>.Filter.Eq(p => p.Id, id);
+            var addAchievement = Builders<Player>.Update.Set(p => p.achievements[index], true);
+            var options = new FindOneAndUpdateOptions<Player>()
+            {
+                ReturnDocument = ReturnDocument.After
+            };
+
+            return await _playerCollection.FindOneAndUpdateAsync(filter, addAchievement, options);
         }
 
         public async Task<bool[]> GetAchievements(Guid id)
         {
-            return null;
+            var filter = Builders<Player>.Filter.Eq(p => p.Id, id);
+            Player player = await _playerCollection.Find(filter).FirstAsync();
+
+            return player.achievements.ToArray();
         }
 
         public async Task<Player[]> GetAllWithAchievement(int index)
         {
-            return null;
+            var filter = Builders<Player>.Filter.Eq(p => p.achievements[index], true);
+
+            var players = await _playerCollection.Find(filter).ToListAsync();
+            return players.ToArray();
         }
 
-        public async Task<Player[]> GetAvgPlayersPerLevel()
+        public async Task<LevelCount[]> GetAvgPlayersPerLevel()
         {
-            return null;
+            var levelCounts =
+                await _playerCollection.Aggregate()
+                    .Project(p => new LevelContainer { Level = p.Level })
+                    .Group(levelContainer => levelContainer.Level, grouping => new LevelCount { Id = grouping.Key, Count = grouping.Select(levelContainer => levelContainer.Level).Count() })
+                    .SortByDescending(l => l.Id)
+                    .ToListAsync();
+
+            return levelCounts.ToArray();
         }
-        public async Task<Player[]> GetTop10Descending()
+        public async Task<Player[]> GetTop10()
         {
             var sortDef = Builders<Player>.Sort.Descending(p => p.Score);
             var players = await _playerCollection.Find(new BsonDocument()).Limit(10).Sort(sortDef).ToListAsync();
