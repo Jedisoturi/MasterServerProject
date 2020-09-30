@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-public enum Achievement
+namespace MasterServer
 {
-    FirstLevelComplete,
-    LevelWithoutDying,
-    KilledAllInLevel,
-    Pacifist
+    public enum Achievement
+    {
+        FirstLevelComplete,
+        LevelWithoutDying,
+        KilledAllInLevel,
+        Pacifist
+    }
 }
