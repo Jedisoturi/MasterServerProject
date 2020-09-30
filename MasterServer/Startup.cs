@@ -26,6 +26,7 @@ namespace MasterServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            // TODO: Add singletons
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -35,8 +36,6 @@ namespace MasterServer
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseHttpsRedirection();
 
             app.UseRouting();
 
