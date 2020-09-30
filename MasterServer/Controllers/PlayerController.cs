@@ -108,9 +108,9 @@ namespace MasterServer
         }
 
         [HttpGet("top10")]
-        public async Task<Player[]> GetTopTenDescending(int? minScore)
+        public async Task<Player[]> GetTop10Descending(int? minScore)
         {
-            return await _repo.GetTop10SortedByScoreDescending();
+            return await _repo.GetTop10Descending();
         }
     }
 }
