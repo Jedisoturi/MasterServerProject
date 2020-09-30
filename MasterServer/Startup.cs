@@ -26,7 +26,7 @@ namespace MasterServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            // TODO: Add singletons
+            services.AddSingleton<DBRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
