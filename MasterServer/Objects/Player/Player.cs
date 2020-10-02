@@ -9,7 +9,9 @@ namespace MasterServer
     {
         public Player()
         {
-            achievements = new bool[Enum.GetNames(typeof(Achievement)).Length];
+            Achievements = new bool[Enum.GetNames(typeof(Achievement)).Length];
+            for (int i = 0; i < Achievements.Length; i++)
+                Achievements[i] = false;
         }
 
         public Guid Id { get; set; }
@@ -17,6 +19,6 @@ namespace MasterServer
         public int Score { get; set; }
         public int Level { get; set; }
         public DateTime CreationTime { get; set; }
-        public bool[] achievements;
+        public bool[] Achievements { get; set; }
     }
 }
