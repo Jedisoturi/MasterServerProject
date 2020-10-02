@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace MasterServer.Controllers
 {
     [ApiController]
-    [Route("servers")]
+    [Route("api/servers")]
     public class ServersController : ControllerBase
     {
         private readonly ILogger<ServersController> _logger;
@@ -98,6 +98,7 @@ namespace MasterServer.Controllers
         [HttpPatch("{id:Guid}")]
         public async Task<Server> Modify(Guid id, [FromBody] ModifiedServer modifiedServer)
         {
+            // TODO: Implement server modify
             //return await _repository.Modify(id, modifiedServer);
             return null;
         }
@@ -120,29 +121,15 @@ namespace MasterServer.Controllers
         [HttpPatch("{serverId:Guid}/modifyMaxPlayers/{maxPlayers:int}")]
         public async Task<Server> ModifyMaxPlayers(Guid serverId, int maxPlayers, Guid? adminKey)
         {
-            //if (adminKey.HasValue && await _repository.CheckKey(serverId, adminKey))
-            //{
-            //    return await _repository.ModifyMaxPlayers(serverId, maxPlayers);
-            //}
-            //else
-            //{
-            //    return null;
-            //}
-            return null;
+            await ValidateAdminKey(serverId, adminKey);
+            return await _repository.ModifyServerMaxPlayers(serverId, maxPlayers);
         }
 
         [HttpPatch("{serverId:Guid}/modifyHasPassword/{hasPassword:bool}")]
         public async Task<Server> ModifyHasPassword(Guid serverId, bool hasPassword, Guid? adminKey)
         {
-            //if (adminKey.HasValue && await _repository.CheckKey(serverId, adminKey))
-            //{
-            //    return await _repository.HasPassword(serverId, hasPassword);
-            //}
-            //else
-            //{
-            //    return null;
-            //}
-            return null;
+            await ValidateAdminKey(serverId, adminKey);
+            return await _repository.ModifyServerHasPassword(serverId, hasPassword);
         }
 
         #endregion
@@ -152,8 +139,7 @@ namespace MasterServer.Controllers
         [HttpGet("{id:Guid}/players")]
         public async Task<Player[]> GetPlayers(Guid id)
         {
-            //return await _repository.GetPlayers(id);
-            return null;
+            return await _repository.GetServerPlayerFromDB(id);
         }
 
         #endregion
