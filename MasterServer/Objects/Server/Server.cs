@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -11,7 +13,8 @@ namespace MasterServer
         // TODO: Add attributes
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public IPEndPoint EndPoint { get; set; }
+        [ValidateIPEndPoint]
+        public string EndPoint { get; set; }
         public List<Guid> Players { get; set; }
         public int MaxPlayers { get; set; }
         public DateTime CreationDate { get; set; }
@@ -20,7 +23,7 @@ namespace MasterServer
         // TODO: Add tags
         // TODO: Add map
 
-        public Server(string name, IPEndPoint endPoint, int maxPlayers, List<Guid> players, 
+        public Server(string name, string endPoint, int maxPlayers, List<Guid> players, 
             List<Guid> bannedPlayers, bool hasPassword)
         {
             Id = Guid.NewGuid();

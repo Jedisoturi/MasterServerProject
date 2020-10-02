@@ -9,7 +9,8 @@ namespace MasterServer
     public class ModifiedServer
     {
         public string Name { get; set; }
-        public IPEndPoint EndPoint { get; set; }
+        [ValidateIPEndPoint]
+        public string EndPoint { get; set; }
         public List<Guid> Players { get; set; }
         public int MaxPlayers { get; set; }
         public List<Guid> BannedPlayers { get; set; }
