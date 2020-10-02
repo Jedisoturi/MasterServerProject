@@ -20,22 +20,22 @@ namespace MasterServer.Controllers
             _logger = logger;
             _repository = repository;
         }
-#if false
-#region CoreRoutes
+
+        #region CoreRoutes
 
         [HttpGet]
         public async Task<Server[]> GetAll()
         {
-            return await _repository.GetAll();
+            return await _repository.GetAllServers();
         }
 
         [HttpGet("{id:Guid}")]
         public async Task<Server> Get(Guid id)
         {
-            return await _repository.Get(id);
+            return await _repository.GetServer(id);
         }
 
-        [HttpPost]
+        [HttpPost("create")]
         public async Task<ServerAndKey> Create([FromBody] NewServer newServer)
         {
             var server = new Server(
@@ -47,152 +47,125 @@ namespace MasterServer.Controllers
                 newServer.HasPassword
             );
 
-            Guid adminKey = Guid.NewGuid();
+            var adminKey = Guid.NewGuid();
 
+            await _repository.CreateServer(server);
+            await _repository.CreateServerAdminKey(new ServerIdAndKey(server.Id, adminKey));
 
-            return await _repository.Create(server);
+            return new ServerAndKey(server, adminKey);
         }
 
         [HttpDelete("{id:Guid}")]
         public async Task<Server> Delete(Guid id, Guid? adminKey)
         {
-            if (adminKey.HasValue && await _repository.CheckKey(id, adminKey))
-            {
-                return await _repository.Delete(id);
-            }
-            else
-            {
-                return null;
-            }
+            await ValidateAdminKey(id, adminKey);
+            await _repository.DeleteServerAdminKey(id);
+            return await _repository.DeleteServer(id);
         }
 
         [HttpPatch("{serverId:Guid}/playerConnected/{playerId:Guid}")]
         public async Task<Server> PlayerConnected(Guid serverId, Guid playerId, Guid? adminKey)
         {
-            if (adminKey.HasValue && await _repository.CheckKey(serverId, adminKey))
-            {
-                return await _repository.PlayerConnected(serverId, playerId);
-            }
-            else
-            {
-                return null;
-            }
+            await ValidateAdminKey(serverId, adminKey);
+            return await _repository.PlayerConnected(serverId, playerId);
         }
 
         [HttpPatch("{serverId:Guid}/playerDisconnected/{playerId:Guid}")]
         public async Task<Server> PlayerDisconnected(Guid serverId, Guid playerId, Guid? adminKey)
         {
-            if (adminKey.HasValue && await _repository.CheckKey(serverId, adminKey))
-            {
-                return await _repository.PlayerDisconnected(serverId, playerId);
-            }
-            else
-            {
-                return null;
-            }
+            await ValidateAdminKey(serverId, adminKey);
+            return await _repository.PlayerDisconnected(serverId, playerId);
         }
 
         [HttpPatch("{serverId:Guid}/banPlayer/{playerId:Guid}")]
         public async Task<Server> BanPlayer(Guid serverId, Guid playerId, Guid? adminKey)
         {
-            if (adminKey.HasValue && await _repository.CheckKey(serverId, adminKey))
-            {
-                return await _repository.BanPlayer(serverId, playerId);
-            }
-            else
-            {
-                return null;
-            }
+            await ValidateAdminKey(serverId, adminKey);
+            return await _repository.BanPlayer(serverId, playerId);
         }
 
         [HttpPatch("{serverId:Guid}/unbanPlayer/{playerId:Guid}")]
         public async Task<Server> UnbanPlayer(Guid serverId, Guid playerId, Guid? adminKey)
         {
-            if (adminKey.HasValue && await _repository.CheckKey(serverId, adminKey))
-            {
-                return await _repository.UnbanPlayer(serverId, playerId);
-            }
-            else
-            {
-                return null;
-            }
+            await ValidateAdminKey(serverId, adminKey);
+            return await _repository.UnbanPlayer(serverId, playerId);
         }
 
-#endregion
+        #endregion
 
-#region Modify
+        #region Modify
 
         [HttpPatch("{id:Guid}")]
         public async Task<Server> Modify(Guid id, [FromBody] ModifiedServer modifiedServer)
         {
-            return await _repository.Modify(id, modifiedServer);
+            //return await _repository.Modify(id, modifiedServer);
+            return null;
         }
 
         // TODO: Maybe change validation of string from alpha
         [HttpPatch("{serverId:Guid}/modifyName/{name:alpha}")]
         public async Task<Server> ModifyName(Guid serverId, string name, Guid? adminKey)
         {
-            if (adminKey.HasValue && await _repository.CheckKey(serverId, adminKey))
-            {
-                return await _repository.ModifyName(serverId, name);
-            }
-            else
-            {
-                return null;
-            }
+            await ValidateAdminKey(serverId, adminKey);
+            return await _repository.ModifyServerName(serverId, name);
         }
 
-        [HttpPatch("{serverId:Guid}/modifyEndPoint/{endPoint:IPEndPoint}")]
-        public async Task<Server> ModifyEndPoint(Guid serverId, IPEndPoint endPoint, Guid? adminKey)
+        [HttpPatch("{serverId:Guid}/modifyEndPoint/{endPoint}")]
+        public async Task<Server> ModifyEndPoint(Guid serverId, [ValidateIPEndPoint] string endPoint, Guid? adminKey)
         {
-            if (adminKey.HasValue && await _repository.CheckKey(serverId, adminKey))
-            {
-                return await _repository.ModifyName(serverId, endPoint);
-            }
-            else
-            {
-                return null;
-            }
+            await ValidateAdminKey(serverId, adminKey);
+            return await _repository.ModifyServerEndPoint(serverId, endPoint);
         }
 
         [HttpPatch("{serverId:Guid}/modifyMaxPlayers/{maxPlayers:int}")]
         public async Task<Server> ModifyMaxPlayers(Guid serverId, int maxPlayers, Guid? adminKey)
         {
-            if (adminKey.HasValue && await _repository.CheckKey(serverId, adminKey))
-            {
-                return await _repository.ModifyMaxPlayers(serverId, maxPlayers);
-            }
-            else
-            {
-                return null;
-            }
+            //if (adminKey.HasValue && await _repository.CheckKey(serverId, adminKey))
+            //{
+            //    return await _repository.ModifyMaxPlayers(serverId, maxPlayers);
+            //}
+            //else
+            //{
+            //    return null;
+            //}
+            return null;
         }
 
         [HttpPatch("{serverId:Guid}/modifyHasPassword/{hasPassword:bool}")]
         public async Task<Server> ModifyHasPassword(Guid serverId, bool hasPassword, Guid? adminKey)
         {
-            if (adminKey.HasValue && await _repository.CheckKey(serverId, adminKey))
-            {
-                return await _repository.HasPassword(serverId, hasPassword);
-            }
-            else
-            {
-                return null;
-            }
+            //if (adminKey.HasValue && await _repository.CheckKey(serverId, adminKey))
+            //{
+            //    return await _repository.HasPassword(serverId, hasPassword);
+            //}
+            //else
+            //{
+            //    return null;
+            //}
+            return null;
         }
 
-#endregion
+        #endregion
 
-#region GetRoutes
+        #region GetRoutes
 
         [HttpGet("{id:Guid}/players")]
         public async Task<Player[]> GetPlayers(Guid id)
         {
-            return await _repository.GetPlayers(id);
+            //return await _repository.GetPlayers(id);
+            return null;
         }
 
-#endregion
+        #endregion
 
-#endif
+        #region
+
+        private async Task ValidateAdminKey(Guid id, Guid? adminKey)
+        {
+            if (!adminKey.HasValue) throw new Exception($"You must provide an adminKey");
+            if (await _repository.GetAdminKey(id) != adminKey.Value) throw new Exception($"AdminKey doesn't match server");
+        }
+
+        #endregion
     }
 }

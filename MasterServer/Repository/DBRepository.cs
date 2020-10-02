@@ -11,8 +11,10 @@ namespace MasterServer
     {
         private readonly IMongoCollection<Player> _playerCollection;
         private readonly IMongoCollection<Server> _serverCollection;
+        private readonly IMongoCollection<ServerIdAndKey> _serverAdminKeyCollection;
         private readonly IMongoCollection<BsonDocument> _bsonDocumentCollection;
         private readonly IMongoCollection<BsonDocument> _bsonDocumentCollection2;
+        private readonly IMongoCollection<BsonDocument> _bsonDocumentCollection3;
 
         public DBRepository()
         {
@@ -20,9 +22,11 @@ namespace MasterServer
             var database = mongoClient.GetDatabase("masterserver");
             _playerCollection = database.GetCollection<Player>("players");
             _serverCollection = database.GetCollection<Server>("servers");
+            _serverAdminKeyCollection = database.GetCollection<ServerIdAndKey>("serverAdminKeys");
 
             _bsonDocumentCollection = database.GetCollection<BsonDocument>("players");
             _bsonDocumentCollection2 = database.GetCollection<BsonDocument>("servers");
+            _bsonDocumentCollection3 = database.GetCollection<BsonDocument>("serverAdminKeys");
         }
 
         #region Player Database
@@ -171,6 +175,124 @@ namespace MasterServer
 
             return players.ToArray();
         }
+        #endregion
+
+        #region Server Database
+
+        // TODO: Better error reporting if wrong id is supplied
+
+        public async Task<Server[]> GetAllServers()
+        {
+            return (await (await _serverCollection.FindAsync(new BsonDocument())).ToListAsync()).ToArray();
+        }
+
+        public async Task<Server> GetServer(Guid id)
+        {
+            var filter = Builders<Server>.Filter.Eq(s => s.Id, id);
+            return await (await _serverCollection.FindAsync(filter)).FirstAsync();
+        }
+
+        public async Task<Server> CreateServer(Server server)
+        {
+            await _serverCollection.InsertOneAsync(server);
+            return server;
+        }
+
+        public async Task<Server> DeleteServer(Guid id)
+        {
+            var filter = Builders<Server>.Filter.Eq(s => s.Id, id);
+            return await _serverCollection.FindOneAndDeleteAsync(filter);
+        }
+
+        public async Task<Server> PlayerConnected(Guid serverId, Guid playerId)
+        {
+            var filter = Builders<Server>.Filter.Eq(s => s.Id, serverId);
+            var update = Builders<Server>.Update.Push(s => s.Players, playerId);
+            var options = new FindOneAndUpdateOptions<Server>()
+            {
+                ReturnDocument = ReturnDocument.After
+            };
+            return await _serverCollection.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        public async Task<Server> PlayerDisconnected(Guid serverId, Guid playerId)
+        {
+            var filter = Builders<Server>.Filter.Eq(s => s.Id, serverId);
+            var update = Builders<Server>.Update.Pull(s => s.Players, playerId);
+            var options = new FindOneAndUpdateOptions<Server>()
+            {
+                ReturnDocument = ReturnDocument.After
+            };
+            return await _serverCollection.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        public async Task<Server> BanPlayer(Guid serverId, Guid playerId)
+        {
+            var filter = Builders<Server>.Filter.Eq(s => s.Id, serverId);
+            var update = Builders<Server>.Update.Push(s => s.BannedPlayers, playerId);
+            var options = new FindOneAndUpdateOptions<Server>()
+            {
+                ReturnDocument = ReturnDocument.After
+            };
+            return await _serverCollection.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        public async Task<Server> UnbanPlayer(Guid serverId, Guid playerId)
+        {
+            var filter = Builders<Server>.Filter.Eq(s => s.Id, serverId);
+            var update = Builders<Server>.Update.Pull(s => s.BannedPlayers, playerId);
+            var options = new FindOneAndUpdateOptions<Server>()
+            {
+                ReturnDocument = ReturnDocument.After
+            };
+            return await _serverCollection.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+
+        public async Task<Server> ModifyServerName(Guid serverId, string name)
+        {
+            var filter = Builders<Server>.Filter.Eq(s => s.Id, serverId);
+            var update = Builders<Server>.Update.Set(s => s.Name, name);
+            var options = new FindOneAndUpdateOptions<Server>()
+            {
+                ReturnDocument = ReturnDocument.After
+            };
+            return await _serverCollection.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        public async Task<Server> ModifyServerEndPoint(Guid serverId, string endPoint)
+        {
+            var filter = Builders<Server>.Filter.Eq(s => s.Id, serverId);
+            var update = Builders<Server>.Update.Set(s => s.EndPoint, endPoint);
+            var options = new FindOneAndUpdateOptions<Server>()
+            {
+                ReturnDocument = ReturnDocument.After
+            };
+            return await _serverCollection.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        #endregion
+
+        #region ServerAdminKey Database
+
+        public async Task<ServerIdAndKey> CreateServerAdminKey(ServerIdAndKey serverIdAndKey)
+        {
+            await _serverAdminKeyCollection.InsertOneAsync(serverIdAndKey);
+            return serverIdAndKey;
+        }
+
+        public async Task<ServerIdAndKey> DeleteServerAdminKey(Guid id)
+        {
+            var filter = Builders<ServerIdAndKey>.Filter.Eq(s => s.Id, id);
+            return await _serverAdminKeyCollection.FindOneAndDeleteAsync(filter);
+        }
+
+        public async Task<Guid> GetAdminKey(Guid id)
+        {
+            var filter = Builders<ServerIdAndKey>.Filter.Eq(s => s.Id, id);
+            return (await (await _serverAdminKeyCollection.FindAsync(filter)).FirstAsync()).AdminKey;
+        }
+
         #endregion
     }
 }

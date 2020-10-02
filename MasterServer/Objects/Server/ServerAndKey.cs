@@ -9,5 +9,11 @@ namespace MasterServer
     {
         public Server Server { get; set; }
         public Guid AdminKey { get; set; }
+
+        public ServerAndKey(Server server, Guid adminKey)
+        {
+            Server = server;
+            AdminKey = adminKey;
+        }
     }
 }
