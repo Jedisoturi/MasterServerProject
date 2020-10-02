@@ -151,7 +151,7 @@ namespace MasterServer
 
         public async Task<Player[]> GetTop3Achievers()
         {
-            var sortDef = Builders<Player>.Sort.Descending(p => p.Achievements.TrueCount());
+            var sortDef = Builders<Player>.Sort.Descending(p => p.AchievementCount);
             var players = await _playerCollection.Find(new BsonDocument()).Sort(sortDef).Limit(3).ToListAsync();
 
             return players.ToArray();
