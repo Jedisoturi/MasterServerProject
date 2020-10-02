@@ -10,6 +10,8 @@ namespace MasterServer
         public Player()
         {
             Achievements = new bool[Enum.GetNames(typeof(Achievement)).Length];
+            for (int i = 0; i < Achievements.Length; i++)
+                Achievements[i] = false;
         }
 
         public Guid Id { get; set; }

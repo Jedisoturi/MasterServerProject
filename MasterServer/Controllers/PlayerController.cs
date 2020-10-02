@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -63,12 +64,17 @@ namespace MasterServer
             player.Id = Guid.NewGuid();
             player.Name = name;
             player.CreationTime = DateTime.Now;
+
+
+            int a = player.Achievements.Count(c => c == true);
             return await _repo.CreatePlayer(player);
         }
 
         [HttpPost("{id}/rename/{name}")]
-        public async Task<Player> Delete(Guid id, string name)
+        public async Task<Player> Rename(Guid id, string name)
         {
+            await ValidatePlayer(id);
+
             return await _repo.Rename(id, name);
         }
 
@@ -87,7 +93,7 @@ namespace MasterServer
         [HttpPost("{id}/addAchievement/{index}")]
         public async Task<Player> AddAchievement(Guid id, int index)
         {
-            return await _repo.IncPlayerLevel(id, index);
+            return await _repo.AddAchievement(id, index);
         }
 
         [HttpGet("{id}/achievements")]
@@ -96,11 +102,24 @@ namespace MasterServer
             return await _repo.GetAchievements(id);
         }
 
+        [HttpGet("{id}/achievementCount")]
+        public async Task<int> GetAchievementCount(Guid id)
+        {
+            return await _repo.GetAchievementCount(id);
+        }
+
         [HttpGet("AllWithAchievement/{index}")]
         public async Task<Player[]> GetAllWithAchievement(int index)
         {
             return await _repo.GetAllWithAchievement(index);
         }
+
+        [HttpGet("top3Achievers")]
+        public async Task<Player[]> GetTop3Achievers()
+        {
+            return await _repo.GetTop3Achievers();
+        }
+
 
         [HttpGet("AvgPlayersPerLevel")]
         public async Task<LevelCount[]> GetAvgPlayersPerLevel()
@@ -112,6 +131,12 @@ namespace MasterServer
         public async Task<Player[]> GetTop10(int? minScore)
         {
             return await _repo.GetTop10();
+        }
+
+        private async Task ValidatePlayer(Guid id)
+        {
+            Player player = await _repo.GetPlayer(id);
+            if (player == null || player.Id != id) throw new IdNotFoundException("Could not find player with ID: " + id);
         }
     }
 }

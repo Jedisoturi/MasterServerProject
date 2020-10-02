@@ -132,8 +132,15 @@ namespace MasterServer
         {
             var filter = Builders<Player>.Filter.Eq(p => p.Id, id);
             Player player = await _playerCollection.Find(filter).FirstAsync();
-
+            Console.WriteLine(player.Achievements.TrueCount());
             return player.Achievements.ToArray();
+        }
+
+        public async Task<int> GetAchievementCount(Guid id)
+        {
+            var filter = Builders<Player>.Filter.Eq(p => p.Id, id);
+            Player player = await _playerCollection.Find(filter).FirstAsync();
+            return player.Achievements.TrueCount();
         }
 
         public async Task<Player[]> GetAllWithAchievement(int index)
@@ -144,13 +151,21 @@ namespace MasterServer
             return players.ToArray();
         }
 
+        public async Task<Player[]> GetTop3Achievers()
+        {
+            var sortDef = Builders<Player>.Sort.Descending(p => p.Achievements.TrueCount());
+            var players = await _playerCollection.Find(new BsonDocument()).Sort(sortDef).Limit(3).ToListAsync();
+
+            return players.ToArray();
+        }
+
         public async Task<LevelCount[]> GetAvgPlayersPerLevel()
         {
             var levelCounts =
                 await _playerCollection.Aggregate()
                     .Project(p => new LevelContainer { Level = p.Level })
                     .Group(levelContainer => levelContainer.Level, grouping => new LevelCount { Id = grouping.Key, Count = grouping.Select(levelContainer => levelContainer.Level).Count() })
-                    .SortByDescending(l => l.Id)
+                    .SortBy(l => l.Id)
                     .ToListAsync();
 
             return levelCounts.ToArray();
@@ -158,11 +173,10 @@ namespace MasterServer
         public async Task<Player[]> GetTop10()
         {
             var sortDef = Builders<Player>.Sort.Descending(p => p.Score);
-            var players = await _playerCollection.Find(new BsonDocument()).Limit(10).Sort(sortDef).ToListAsync();
+            var players = await _playerCollection.Find(new BsonDocument()).Sort(sortDef).Limit(10).ToListAsync();
 
             return players.ToArray();
         }
-
         #endregion
 
         #region Server Database
