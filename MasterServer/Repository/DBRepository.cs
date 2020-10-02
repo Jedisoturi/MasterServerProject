@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -88,7 +90,7 @@ namespace MasterServer
             {
                 ReturnDocument = ReturnDocument.After
             };
-            return await _playerCollection.FindOneAndUpdateAsync(filter, Builders<Player>.Update.Set("Name", name), options);
+            return await _playerCollection.FindOneAndUpdateAsync(filter, Builders<Player>.Update.Set(p => p.Name, name), options);
         }
 
         public async Task<Player> IncPlayerScore(Guid playerId, int increment)
@@ -117,7 +119,7 @@ namespace MasterServer
         public async Task<Player> AddAchievement(Guid id, int index)
         {
             FilterDefinition<Player> filter = Builders<Player>.Filter.Eq(p => p.Id, id);
-            var addAchievement = Builders<Player>.Update.Set(p => p.achievements[index], true);
+            var addAchievement = Builders<Player>.Update.Set(p => p.Achievements[index], true);
             var options = new FindOneAndUpdateOptions<Player>()
             {
                 ReturnDocument = ReturnDocument.After
@@ -131,12 +133,12 @@ namespace MasterServer
             var filter = Builders<Player>.Filter.Eq(p => p.Id, id);
             Player player = await _playerCollection.Find(filter).FirstAsync();
 
-            return player.achievements.ToArray();
+            return player.Achievements.ToArray();
         }
 
         public async Task<Player[]> GetAllWithAchievement(int index)
         {
-            var filter = Builders<Player>.Filter.Eq(p => p.achievements[index], true);
+            var filter = Builders<Player>.Filter.Eq(p => p.Achievements[index], true);
 
             var players = await _playerCollection.Find(filter).ToListAsync();
             return players.ToArray();
@@ -234,7 +236,6 @@ namespace MasterServer
             return await _serverCollection.FindOneAndUpdateAsync(filter, update, options);
         }
 
-
         public async Task<Server> ModifyServerName(Guid serverId, string name)
         {
             var filter = Builders<Server>.Filter.Eq(s => s.Id, serverId);
@@ -255,6 +256,41 @@ namespace MasterServer
                 ReturnDocument = ReturnDocument.After
             };
             return await _serverCollection.FindOneAndUpdateAsync(filter, update, options);
+        }
+        public async Task<Server> ModifyServerMaxPlayers(Guid serverId, int maxPlayers)
+        {
+            var filter = Builders<Server>.Filter.Eq(s => s.Id, serverId);
+            var update = Builders<Server>.Update.Set(s => s.MaxPlayers, maxPlayers);
+            var options = new FindOneAndUpdateOptions<Server>()
+            {
+                ReturnDocument = ReturnDocument.After
+            };
+            return await _serverCollection.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        public async Task<Server> ModifyServerHasPassword(Guid serverId, bool hasPassword)
+        {
+            var filter = Builders<Server>.Filter.Eq(s => s.Id, serverId);
+            var update = Builders<Server>.Update.Set(s => s.HasPassword, hasPassword);
+            var options = new FindOneAndUpdateOptions<Server>()
+            {
+                ReturnDocument = ReturnDocument.After
+            };
+            return await _serverCollection.FindOneAndUpdateAsync(filter, update, options);
+        }
+
+        public async Task<Player[]> GetServerPlayerFromDB(Guid id)
+        {
+            var serverFilter = Builders<Server>.Filter.Eq(s => s.Id, id);
+            var playerIds = (await (await _serverCollection.FindAsync(serverFilter)).FirstAsync()).Players;
+
+            var players = new List<Player>();
+            foreach (Guid playerId in playerIds)
+            {
+                var playerFilter = Builders<Player>.Filter.Eq(p => p.Id, playerId);
+                players.Add(await (await _playerCollection.FindAsync(playerFilter)).FirstAsync());
+            }
+            return players.ToArray();
         }
 
         #endregion

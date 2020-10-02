@@ -66,7 +66,7 @@ namespace MasterServer
             return await _repo.CreatePlayer(player);
         }
 
-        [HttpPost("{id}/rename/({name}")]
+        [HttpPost("{id}/rename/{name}")]
         public async Task<Player> Delete(Guid id, string name)
         {
             return await _repo.Rename(id, name);
