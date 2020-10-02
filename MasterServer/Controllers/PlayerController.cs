@@ -11,12 +11,12 @@ namespace MasterServer
     {
         private readonly ILogger<PlayerController> _logger;
         private readonly DBRepository _repo;
-        Random rand;
+        //Random rand;
         public PlayerController(ILogger<PlayerController> logger, DBRepository repo)
         {
             _logger = logger;
             _repo = repo;
-            rand = new Random();
+            //rand = new Random();
         }
 
         [HttpGet]
@@ -58,10 +58,11 @@ namespace MasterServer
         public async Task<Player> Create(string name = null)
         {
             if (name == null)
-                name = "Player" + rand.Next(1, Int32.MaxValue);
+                name = "Player" + (await _repo.GetSize() + 1); //rand.Next(1, Int32.MaxValue);
             Player player = new Player();
             player.Id = Guid.NewGuid();
             player.Name = name;
+            player.CreationTime = DateTime.Now;
             return await _repo.CreatePlayer(player);
         }
 
@@ -102,15 +103,15 @@ namespace MasterServer
         }
 
         [HttpGet("AvgPlayersPerLevel")]
-        public async Task<Player[]> GetAvgPlayersPerLevel()
+        public async Task<LevelCount[]> GetAvgPlayersPerLevel()
         {
             return await _repo.GetAvgPlayersPerLevel();
         }
 
         [HttpGet("top10")]
-        public async Task<Player[]> GetTop10Descending(int? minScore)
+        public async Task<Player[]> GetTop10(int? minScore)
         {
-            return await _repo.GetTop10Descending();
+            return await _repo.GetTop10();
         }
     }
 }
