@@ -151,14 +151,6 @@ namespace MasterServer
             return players.ToArray();
         }
 
-        public async Task<Player[]> GetTop3Achievers()
-        {
-            var sortDef = Builders<Player>.Sort.Descending(p => p.AchievementCount);
-            var players = await _playerCollection.Find(new BsonDocument()).Sort(sortDef).Limit(3).ToListAsync();
-
-            return players.ToArray();
-        }
-
         public async Task<LevelCount[]> GetAvgPlayersPerLevel()
         {
             var levelCounts =
@@ -167,7 +159,6 @@ namespace MasterServer
                     .Group(levelContainer => levelContainer.Level, grouping => new LevelCount { Id = grouping.Key, Count = grouping.Select(levelContainer => levelContainer.Level).Count() })
                     .SortBy(l => l.Id)
                     .ToListAsync();
-
             return levelCounts.ToArray();
         }
         public async Task<Player[]> GetTop10()
