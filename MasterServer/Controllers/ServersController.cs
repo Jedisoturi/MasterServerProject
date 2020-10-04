@@ -63,28 +63,28 @@ namespace MasterServer.Controllers
             return await _repository.DeleteServer(id);
         }
 
-        [HttpPatch("{serverId:Guid}/playerConnected/{playerId:Guid}")]
+        [HttpPost("{serverId:Guid}/playerConnected/{playerId:Guid}")]
         public async Task<Server> PlayerConnected(Guid serverId, Guid playerId, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.PlayerConnected(serverId, playerId);
         }
 
-        [HttpPatch("{serverId:Guid}/playerDisconnected/{playerId:Guid}")]
+        [HttpPost("{serverId:Guid}/playerDisconnected/{playerId:Guid}")]
         public async Task<Server> PlayerDisconnected(Guid serverId, Guid playerId, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.PlayerDisconnected(serverId, playerId);
         }
 
-        [HttpPatch("{serverId:Guid}/banPlayer/{playerId:Guid}")]
+        [HttpPost("{serverId:Guid}/banPlayer/{playerId:Guid}")]
         public async Task<Server> BanPlayer(Guid serverId, Guid playerId, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.BanPlayer(serverId, playerId);
         }
 
-        [HttpPatch("{serverId:Guid}/unbanPlayer/{playerId:Guid}")]
+        [HttpPost("{serverId:Guid}/unbanPlayer/{playerId:Guid}")]
         public async Task<Server> UnbanPlayer(Guid serverId, Guid playerId, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
@@ -95,7 +95,7 @@ namespace MasterServer.Controllers
 
         #region Modify
 
-        [HttpPatch("{id:Guid}")]
+        [HttpPost("{id:Guid}")]
         public async Task<Server> Modify(Guid id, [FromBody] ModifiedServer modifiedServer)
         {
             // TODO: Implement server modify
@@ -104,28 +104,28 @@ namespace MasterServer.Controllers
         }
 
         // TODO: Maybe change validation of string from alpha
-        [HttpPatch("{serverId:Guid}/modifyName/{name:alpha}")]
+        [HttpPost("{serverId:Guid}/modifyName/{name:alpha}")]
         public async Task<Server> ModifyName(Guid serverId, string name, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.ModifyServerName(serverId, name);
         }
 
-        [HttpPatch("{serverId:Guid}/modifyEndPoint/{endPoint}")]
+        [HttpPost("{serverId:Guid}/modifyEndPoint/{endPoint}")]
         public async Task<Server> ModifyEndPoint(Guid serverId, [ValidateIPEndPoint] string endPoint, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.ModifyServerEndPoint(serverId, endPoint);
         }
 
-        [HttpPatch("{serverId:Guid}/modifyMaxPlayers/{maxPlayers:int}")]
+        [HttpPost("{serverId:Guid}/modifyMaxPlayers/{maxPlayers:int}")]
         public async Task<Server> ModifyMaxPlayers(Guid serverId, int maxPlayers, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.ModifyServerMaxPlayers(serverId, maxPlayers);
         }
 
-        [HttpPatch("{serverId:Guid}/modifyHasPassword/{hasPassword:bool}")]
+        [HttpPost("{serverId:Guid}/modifyHasPassword/{hasPassword:bool}")]
         public async Task<Server> ModifyHasPassword(Guid serverId, bool hasPassword, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
@@ -144,7 +144,7 @@ namespace MasterServer.Controllers
 
         #endregion
 
-        #region
+        #region Tools
 
         private async Task ValidateAdminKey(Guid id, Guid? adminKey)
         {
