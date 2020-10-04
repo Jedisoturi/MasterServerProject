@@ -5,18 +5,22 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
 namespace MasterServer
 {
     public class DBRepository
     {
+        #region Field and init
         private readonly IMongoCollection<Player> _playerCollection;
         private readonly IMongoCollection<Server> _serverCollection;
         private readonly IMongoCollection<ServerIdAndKey> _serverAdminKeyCollection;
+        private readonly IMongoCollection<AnalyticEvent> _analyticsCollection;
         private readonly IMongoCollection<BsonDocument> _bsonDocumentCollection;
         private readonly IMongoCollection<BsonDocument> _bsonDocumentCollection2;
         private readonly IMongoCollection<BsonDocument> _bsonDocumentCollection3;
+        private readonly IMongoCollection<BsonDocument> _bsonDocumentCollection4;
 
         public DBRepository()
         {
@@ -25,11 +29,15 @@ namespace MasterServer
             _playerCollection = database.GetCollection<Player>("players");
             _serverCollection = database.GetCollection<Server>("servers");
             _serverAdminKeyCollection = database.GetCollection<ServerIdAndKey>("serverAdminKeys");
+            _analyticsCollection = database.GetCollection<AnalyticEvent>("analytics");
 
             _bsonDocumentCollection = database.GetCollection<BsonDocument>("players");
             _bsonDocumentCollection2 = database.GetCollection<BsonDocument>("servers");
             _bsonDocumentCollection3 = database.GetCollection<BsonDocument>("serverAdminKeys");
+            _bsonDocumentCollection4 = database.GetCollection<BsonDocument>("analytics");
         }
+
+        #endregion
 
         #region Player Database
         public async Task<long> GetSize()
@@ -43,6 +51,7 @@ namespace MasterServer
             var players = await _playerCollection.Find(new BsonDocument()).ToListAsync();
             return players.ToArray();
         }
+
 
         public async Task<Player[]> GetAllMinScore(int minScore)
         {
@@ -318,6 +327,49 @@ namespace MasterServer
         {
             var filter = Builders<ServerIdAndKey>.Filter.Eq(s => s.Id, id);
             return (await (await _serverAdminKeyCollection.FindAsync(filter)).FirstAsync()).AdminKey;
+        }
+
+        #endregion
+
+        #region Analytics Database
+        public async Task<AnalyticEvent[]> GetEvents(EventType? type, Guid? playerId, Search search)
+        {
+            //Sorting by creation ascending/descending
+            SortDefinition<AnalyticEvent> sortDef;
+            if (search.sortAscending)
+                sortDef = Builders<AnalyticEvent>.Sort.Ascending(e => e.CreationTime);
+            else
+                sortDef = Builders<AnalyticEvent>.Sort.Descending(e => e.CreationTime);
+
+            //Filtering by type or not
+            FilterDefinition<AnalyticEvent> typeFilter; 
+            if(type.HasValue)
+                typeFilter = Builders<AnalyticEvent>.Filter.Eq(a => a.Type, type.Value);
+            else
+                typeFilter = Builders<AnalyticEvent>.Filter.Exists(a => a.Type);
+
+            //Filtering by player or not
+            FilterDefinition<AnalyticEvent> playerFilter;
+            if (playerId.HasValue)
+                playerFilter = Builders<AnalyticEvent>.Filter.Eq(a => a.PlayerId, playerId.Value);
+            else
+                playerFilter = Builders<AnalyticEvent>.Filter.Exists(a => a.PlayerId);
+
+            //Filtering by creation date start/min or not
+            FilterDefinition<AnalyticEvent> creationFilter = Builders<AnalyticEvent>.Filter.Gte(e => e.CreationTime, search.startTime) & Builders<AnalyticEvent>.Filter.Lte(e => e.CreationTime, search.endTime);
+
+            //Combine filters
+            FilterDefinition<AnalyticEvent> fullFilter = typeFilter & playerFilter & creationFilter;
+
+            var events = await _analyticsCollection.Find(fullFilter).Sort(sortDef).Limit(search.limit).ToListAsync();
+
+            return events.ToArray();
+        }
+
+        public async Task<AnalyticEvent> NewEvent(AnalyticEvent newEvent)
+        {
+            await _analyticsCollection.InsertOneAsync(newEvent);
+            return newEvent;
         }
 
         #endregion
