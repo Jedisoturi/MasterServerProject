@@ -114,13 +114,6 @@ namespace MasterServer
             return await _repo.GetAllWithAchievement(index);
         }
 
-        [HttpGet("top3Achievers")]
-        public async Task<Player[]> GetTop3Achievers()
-        {
-            return await _repo.GetTop3Achievers();
-        }
-
-
         [HttpGet("AvgPlayersPerLevel")]
         public async Task<LevelCount[]> GetAvgPlayersPerLevel()
         {
