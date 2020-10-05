@@ -46,9 +46,43 @@ namespace MasterServer
             return players;
         }
 
-        public async Task<Player[]> GetAllPlayers()
+        public async Task<Player[]> GetAllPlayers(PlayerSort sort = 0)
         {
-            var players = await _playerCollection.Find(new BsonDocument()).ToListAsync();
+            var options = new FindOptions() { Collation = new Collation(locale: "en_US", numericOrdering: true) };
+            Console.WriteLine(sort);
+            SortDefinition<Player> sortDef;
+            switch (sort)
+            {
+                case PlayerSort.TimeAsc:
+                    sortDef = Builders<Player>.Sort.Ascending(p => p.CreationTime);
+                    break;
+                case PlayerSort.TimeDesc:
+                    sortDef = Builders<Player>.Sort.Descending(p => p.CreationTime);
+                    break;
+                case PlayerSort.NameAsc:
+                    sortDef = Builders<Player>.Sort.Ascending(p => p.Name);
+                    break;
+                case PlayerSort.NameDesc:
+                    sortDef = Builders<Player>.Sort.Descending(p => p.Name);
+                    break;
+                case PlayerSort.ScoreAsc:
+                    sortDef = Builders<Player>.Sort.Ascending(p => p.Score);
+                    break;
+                case PlayerSort.ScoreDesc:
+                    sortDef = Builders<Player>.Sort.Descending(p => p.Score);
+                    break;
+                case PlayerSort.LevelAsc:
+                    sortDef = Builders<Player>.Sort.Ascending(p => p.Level);
+                    break;
+                case PlayerSort.LevelDesc:
+                    sortDef = Builders<Player>.Sort.Descending(p => p.Level);
+                    break;
+                default:
+                    sortDef = Builders<Player>.Sort.Ascending(p => p.CreationTime);
+                    break;
+            }
+            
+            var players = await _playerCollection.Find(new BsonDocument(), options).Sort(sortDef).ToListAsync();
             return players.ToArray();
         }
 
@@ -60,20 +94,6 @@ namespace MasterServer
             return players.ToArray();
         }
 
-        public async Task<Player[]> GetAllSortScore( )
-        {
-            var sortDef = Builders<Player>.Sort.Descending(p => p.Score);
-            var players = await _playerCollection.Find(new BsonDocument()).Sort(sortDef).ToListAsync();
-
-            return players.ToArray();
-        }
-        public async Task<Player[]> GetAllSortDate()
-        {
-            var sortDef = Builders<Player>.Sort.Descending(p => p.CreationTime);
-            var players = await _playerCollection.Find(new BsonDocument()).Sort(sortDef).ToListAsync();
-
-            return players.ToArray();
-        }
         public Task<Player> GetPlayer(Guid id)
         {
             var filter = Builders<Player>.Filter.Eq(player => player.Id, id);
@@ -125,10 +145,10 @@ namespace MasterServer
             Player player = await _playerCollection.FindOneAndUpdateAsync(filter, incrementLevelUpdate, options);
             return player;
         }
-        public async Task<Player> AddAchievement(Guid id, int index)
+        public async Task<Player> AddAchievement(Guid id, Achievement index)
         {
             FilterDefinition<Player> filter = Builders<Player>.Filter.Eq(p => p.Id, id);
-            var addAchievement = Builders<Player>.Update.Set(p => p.Achievements[index], true);
+            var addAchievement = Builders<Player>.Update.Set(p => p.Achievements[(int)index], true);
             var options = new FindOneAndUpdateOptions<Player>()
             {
                 ReturnDocument = ReturnDocument.After

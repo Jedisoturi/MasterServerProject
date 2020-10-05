@@ -21,24 +21,9 @@ namespace MasterServer
         }
 
         [HttpGet]
-        public async Task<Player[]> GetAll(int? minScore)
+        public async Task<Player[]> GetAll(PlayerSort sort = 0)
         {
-            if (minScore.HasValue)
-                return await _repo.GetAllMinScore(minScore.Value);
-            else
-                return await _repo.GetAllPlayers();
-        }
-
-        [HttpGet("sortScore")]
-        public async Task<Player[]> GetAllSortScore()
-        {
-            return await _repo.GetAllSortScore();
-        }
-
-        [HttpGet("sortDate")]
-        public async Task<Player[]> GetAllSortDate()
-        {
-            return await _repo.GetAllSortDate();
+            return await _repo.GetAllPlayers(sort);
         }
 
         [HttpGet("{id:Guid}")]
@@ -91,7 +76,7 @@ namespace MasterServer
         }
 
         [HttpPost("{id}/addAchievement/{index}")]
-        public async Task<Player> AddAchievement(Guid id, int index)
+        public async Task<Player> AddAchievement(Guid id, Achievement index)
         {
             return await _repo.AddAchievement(id, index);
         }
