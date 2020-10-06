@@ -223,7 +223,7 @@ namespace MasterServer
         public async Task<Server> GetServer(Guid id)
         {
             var filter = Builders<Server>.Filter.Eq(s => s.Id, id);
-            return await (await _serverCollection.FindAsync(filter)).FirstAsync();
+            return await (await _serverCollection.FindAsync(filter)).FirstOrDefaultAsync();
         }
 
         public async Task<Server> CreateServer(Server server)
@@ -328,13 +328,13 @@ namespace MasterServer
         public async Task<Player[]> GetServerPlayerFromDB(Guid id)
         {
             var serverFilter = Builders<Server>.Filter.Eq(s => s.Id, id);
-            var playerIds = (await (await _serverCollection.FindAsync(serverFilter)).FirstAsync()).Players;
+            var playerIds = (await (await _serverCollection.FindAsync(serverFilter)).FirstOrDefaultAsync()).Players;
 
             var players = new List<Player>();
             foreach (Guid playerId in playerIds)
             {
                 var playerFilter = Builders<Player>.Filter.Eq(p => p.Id, playerId);
-                players.Add(await (await _playerCollection.FindAsync(playerFilter)).FirstAsync());
+                players.Add(await (await _playerCollection.FindAsync(playerFilter)).FirstOrDefaultAsync());
             }
             return players.ToArray();
         }
@@ -358,7 +358,7 @@ namespace MasterServer
         public async Task<Guid> GetAdminKey(Guid id)
         {
             var filter = Builders<ServerIdAndKey>.Filter.Eq(s => s.Id, id);
-            return (await (await _serverAdminKeyCollection.FindAsync(filter)).FirstAsync()).AdminKey;
+            return (await (await _serverAdminKeyCollection.FindAsync(filter)).FirstOrDefaultAsync()).AdminKey;
         }
 
         #endregion
