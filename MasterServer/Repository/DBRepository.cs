@@ -366,8 +366,15 @@ namespace MasterServer
         #region Analytics Database
         public async Task<AnalyticEvent[]> GetEvents(EventType? type, Guid? playerId, Search search)
         {
-            //Sorting by creation ascending/descending
-            SortDefinition<AnalyticEvent> sortDef;
+           //Filtering by message
+            FilterDefinition<AnalyticEvent> messageFilter;
+            if (search.message != null && search.message.Length > 0 && search.message != "")
+                messageFilter = Builders<AnalyticEvent>.Filter.Regex(a => a.Message, new BsonRegularExpression(search.message));
+            else
+                messageFilter = Builders<AnalyticEvent>.Filter.Exists(a => a.Type);
+
+                //Sorting by creation ascending/descending
+                SortDefinition<AnalyticEvent> sortDef;
             if (search.sortAscending)
                 sortDef = Builders<AnalyticEvent>.Sort.Ascending(e => e.CreationTime);
             else
@@ -391,7 +398,7 @@ namespace MasterServer
             FilterDefinition<AnalyticEvent> creationFilter = Builders<AnalyticEvent>.Filter.Gte(e => e.CreationTime, search.startTime) & Builders<AnalyticEvent>.Filter.Lte(e => e.CreationTime, search.endTime);
 
             //Combine filters
-            FilterDefinition<AnalyticEvent> fullFilter = typeFilter & playerFilter & creationFilter;
+            FilterDefinition<AnalyticEvent> fullFilter = messageFilter & typeFilter & playerFilter & creationFilter;
 
             var events = await _analyticsCollection.Find(fullFilter).Sort(sortDef).Limit(search.limit).ToListAsync();
 

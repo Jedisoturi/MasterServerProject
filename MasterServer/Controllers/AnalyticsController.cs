@@ -26,13 +26,13 @@ namespace MasterServer
             }
                      
             [HttpGet]
-            public async Task<AnalyticEvent[]> GetAll(EventType? type, Guid? playerId, int? limit, bool? sortAscending, DateTime? startTime, DateTime? endTime)
+            public async Task<AnalyticEvent[]> GetAll(EventType? type, Guid? playerId, int? limit, bool? sortAscending, DateTime? startTime, DateTime? endTime, string message = null)
             {
                 int searchLimit = limit.HasValue ? limit.Value : Int32.MaxValue;
                 bool searchSort = sortAscending.HasValue ? sortAscending.Value : false;
                 DateTime searchStartTime = startTime.HasValue ? startTime.Value : DateTime.MinValue;
                 DateTime searchEndTime = endTime.HasValue ? endTime.Value : DateTime.MaxValue;
-                Search search = new Search(searchLimit, searchSort, searchStartTime, searchEndTime);
+                Search search = new Search(message, searchLimit, searchSort, searchStartTime, searchEndTime);
 
                 return await _repo.GetEvents(type, playerId, search);
             }

@@ -7,14 +7,16 @@ namespace MasterServer
 {
     public struct Search
     {
-        public Search(int limit, bool sortAscending, DateTime startTime, DateTime endTime)
+        public Search(string message, int limit, bool sortAscending, DateTime startTime, DateTime endTime)
         { 
+            this.message = message;
             this.limit = limit;
             this.sortAscending = sortAscending;
             this.startTime = startTime;
             this.endTime = endTime;
         }
 
+        public string message;
         public int limit;
         public bool sortAscending;
         public DateTime startTime;
