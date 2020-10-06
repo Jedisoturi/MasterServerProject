@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +27,12 @@ namespace MasterServer
             return await _repo.GetAllPlayers(sort);
         }
 
+        [HttpGet("allGuids")]
+        public async Task<List<Guid>> GetAllGuids()
+        {
+            return await _repo.GetAllPlayerIDs();
+        }
+
         [HttpGet("{id:Guid}")]
         public async Task<Player> Get(Guid id)
         {
@@ -33,7 +40,7 @@ namespace MasterServer
             return player;
         }
 
-        [HttpGet("{name:alpha}")]
+        [HttpGet("name/{name}")]
         public async Task<Player> Get(string name)
         {
             Player player = await _repo.GetPlayer(name);
@@ -58,7 +65,7 @@ namespace MasterServer
         [HttpPost("{id}/rename/{name}")]
         public async Task<Player> Rename(Guid id, string name)
         {
-            await ValidatePlayer(id);
+            //await ValidatePlayer(id);
 
             return await _repo.Rename(id, name);
         }
@@ -111,10 +118,10 @@ namespace MasterServer
             return await _repo.GetTop10();
         }
 
-        private async Task ValidatePlayer(Guid id)
+        private async Task ValidatePlayer(string id)
         {
-            Player player = await _repo.GetPlayer(id);
-            if (player == null || player.Id != id) throw new IdNotFoundException("Could not find player with ID: " + id);
+            //if(id.isvalidGuidblabla)
+           /// if (player == null || player.Id != id) throw new IdNotFoundException("Could not find player with ID: " + id);
         }
     }
 }

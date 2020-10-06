@@ -86,6 +86,18 @@ namespace MasterServer
             return players.ToArray();
         }
 
+        public async Task<bool> ValidatePlayerId(Guid id)
+        {
+            var filter = Builders<Player>.Filter.Eq(player => player.Id, id);
+            var result = await _playerCollection.Find(filter).FirstOrDefaultAsync();
+            return result != null;
+        }
+
+        public async Task<List<Guid>> GetAllPlayerIDs()
+        {
+            var players = await _playerCollection.Find(new BsonDocument()).Project(d => d.Id).ToListAsync();
+            return players;
+        }
 
         public async Task<Player[]> GetAllMinScore(int minScore)
         {
@@ -97,13 +109,13 @@ namespace MasterServer
         public Task<Player> GetPlayer(Guid id)
         {
             var filter = Builders<Player>.Filter.Eq(player => player.Id, id);
-            return _playerCollection.Find(filter).FirstAsync();
+            return _playerCollection.Find(filter).FirstOrDefaultAsync();
         }
 
         public Task<Player> GetPlayer(string name)
         {
             var filter = Builders<Player>.Filter.Eq(player => player.Name, name);
-            return _playerCollection.Find(filter).FirstAsync();
+            return _playerCollection.Find(filter).FirstOrDefaultAsync();
         }
 
         public async Task<Player> CreatePlayer(Player player)
@@ -386,6 +398,31 @@ namespace MasterServer
             return events.ToArray();
         }
 
+        public async Task<List<Guid>> GetAllPlayerIDsWithAnalytics(EventType ? type)
+        {
+            //Filtering by type or not
+            FilterDefinition<AnalyticEvent> typeFilter;
+            if (type.HasValue)
+                typeFilter = Builders<AnalyticEvent>.Filter.Eq(a => a.Type, type.Value);
+            else
+                typeFilter = Builders<AnalyticEvent>.Filter.Exists(a => a.Type);
+
+
+            var players = await _analyticsCollection.Find(typeFilter).Project(p => p.PlayerId).ToListAsync();
+            List<Guid> playerList = new List<Guid>();
+            foreach (Guid p in players)
+            {
+                if (!playerList.Contains(p))
+                    playerList.Add(p);
+            }
+            return playerList;
+        }
+
+        public void aa(Guid player)
+        {
+
+        }
+        
         public async Task<AnalyticEvent> NewEvent(AnalyticEvent newEvent)
         {
             await _analyticsCollection.InsertOneAsync(newEvent);

@@ -24,14 +24,7 @@ namespace MasterServer
                 _repo = repo;
                 //rand = new Random();
             }
-            /*
-            [HttpGet("all")]
-            public async Task<IEvent[]> GetAll()
-            {
-                return await _repo.GetAllEvents();
-            }*/
-            
-            
+                     
             [HttpGet]
             public async Task<AnalyticEvent[]> GetAll(EventType? type, Guid? playerId, int? limit, bool? sortAscending, DateTime? startTime, DateTime? endTime)
             {
@@ -43,13 +36,18 @@ namespace MasterServer
 
                 return await _repo.GetEvents(type, playerId, search);
             }
-            
+
+            [HttpGet("allGuids")]
+            public async Task<List<Guid>> GetAllGuids(EventType ? type)
+            {
+                return await _repo.GetAllPlayerIDsWithAnalytics(type);
+            }
 
             [HttpPost("new/{type:int}")]
             public async Task<AnalyticEvent> NewEvent(EventType type, [FromBody] NewEvent inEvent)
             {
-                //if (type < 0 || type >= Enum.GetNames(typeof(EventType)).Length)
-                //    throw new Exception("Bad event type, valid types are: 0 to " + ((Enum.GetNames(typeof(EventType)).Length) - 1));
+                Player player = await _repo.GetPlayer(inEvent.PlayerId);
+                if (player == null || player.Id != inEvent.PlayerId) throw new IdNotFoundException();
 
                 if (inEvent.Message == null || inEvent.Message.Length == 0)
                     throw new Exception("Empty message");
