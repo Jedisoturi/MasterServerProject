@@ -117,7 +117,7 @@ namespace MasterServer.Controllers
 
         [AppAuthenticationFilter]
         [HttpPost("{serverId:Guid}/modifyName/{name}")]
-        public async Task<Server> ModifyName(Guid serverId, string name, Guid? adminKey, string signature)
+        public async Task<Server> ModifyName(Guid serverId, string name, Guid? adminKey, string signature = null)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.ModifyServerName(serverId, name);
@@ -125,7 +125,7 @@ namespace MasterServer.Controllers
 
         [AppAuthenticationFilter]
         [HttpPost("{serverId:Guid}/modifyEndPoint/{endPoint}")]
-        public async Task<Server> ModifyEndPoint(Guid serverId, [ValidateIPEndPoint] string endPoint, Guid? adminKey, string signature)
+        public async Task<Server> ModifyEndPoint(Guid serverId, [ValidateIPEndPoint] string endPoint, Guid? adminKey, string signature = null)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.ModifyServerEndPoint(serverId, endPoint);
@@ -133,7 +133,7 @@ namespace MasterServer.Controllers
 
         [AppAuthenticationFilter]
         [HttpPost("{serverId:Guid}/modifyMaxPlayers/{maxPlayers:int}")]
-        public async Task<Server> ModifyMaxPlayers(Guid serverId, int maxPlayers, Guid? adminKey, string signature)
+        public async Task<Server> ModifyMaxPlayers(Guid serverId, int maxPlayers, Guid? adminKey, string signature = null)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.ModifyServerMaxPlayers(serverId, maxPlayers);
@@ -141,7 +141,7 @@ namespace MasterServer.Controllers
 
         [AppAuthenticationFilter]
         [HttpPost("{serverId:Guid}/modifyHasPassword/{hasPassword:bool}")]
-        public async Task<Server> ModifyHasPassword(Guid serverId, bool hasPassword, Guid? adminKey, string signature)
+        public async Task<Server> ModifyHasPassword(Guid serverId, bool hasPassword, Guid? adminKey, string signature = null)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.ModifyServerHasPassword(serverId, hasPassword);
