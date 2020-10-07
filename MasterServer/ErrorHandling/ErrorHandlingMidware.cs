@@ -22,8 +22,22 @@ namespace MasterServer
 			catch (IdNotFoundException e)
 			{
 				string ex = e.ToString();
+				Console.WriteLine(ex);
 				context.Response.StatusCode = (int)HttpStatusCode.OK;
 			}
 		}
+		/*
+		public class ImplExceptionFilterAttribute : ExceptionFilterAttribute
+		{
+			public override void OnException(ExceptionContext context)
+			{
+				if (context.Exception is TooLowLevelException e)
+				{
+					Console.WriteLine(e.Message);
+					string ex = e.ToString();
+					context.Result = new BadRequestObjectResult(ex);
+				}
+			}
+		}*/
 	}
 }

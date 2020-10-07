@@ -64,8 +64,7 @@ namespace MasterServer
         [HttpPost("{id}/rename/{name}")]
         public async Task<Player> Rename(Guid id, string name)
         {
-            //await ValidatePlayer(id);
-
+            if (!(await _repo.ValidatePlayerId(id))) throw new IdNotFoundException("Could not find player with ID: " + id);
             return await _repo.Rename(id, name);
         }
 
