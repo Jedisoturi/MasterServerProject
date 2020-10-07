@@ -47,14 +47,18 @@ namespace MasterServer
             [HttpPost("new/{type:int}")]
             public async Task<AnalyticEvent> NewEvent(EventType type, [FromBody] NewEvent inEvent)
             {
-                Player player = await _repo.GetPlayer(inEvent.PlayerId);
-                if (player == null || player.Id != inEvent.PlayerId) throw new IdNotFoundException();
+                await ValidatePlayerId(inEvent.PlayerId);
 
                 if (inEvent.Message == null || inEvent.Message.Length == 0)
                     throw new Exception("Empty message");
 
                 AnalyticEvent outEvent = new AnalyticEvent((EventType)type, inEvent.PlayerId, inEvent.Message, DateTime.Now);
                 return await _repo.NewEvent(outEvent);
+            }
+
+            private async Task ValidatePlayerId(Guid id)
+            {
+                if (!(await _repo.ValidatePlayerId(id))) throw new IdNotFoundException("Could not find player with ID: " + id);
             }
         }
     }
