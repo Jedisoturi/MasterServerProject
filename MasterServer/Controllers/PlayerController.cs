@@ -64,7 +64,7 @@ namespace MasterServer
         [HttpPost("{id}/rename/{name}")]
         public async Task<Player> Rename(Guid id, string name)
         {
-            if (!(await _repo.ValidatePlayerId(id))) throw new IdNotFoundException("Could not find player with ID: " + id);
+            await ValidatePlayerId(id);
             return await _repo.Rename(id, name);
         }
 
@@ -72,6 +72,7 @@ namespace MasterServer
         [HttpPost("{id}/incScore/{inc}")]
         public async Task<Player> IncPlayerScore(Guid id, int inc)
         {
+            await ValidatePlayerId(id);
             return await _repo.IncPlayerScore(id, inc);
         }
 
@@ -79,6 +80,7 @@ namespace MasterServer
         [HttpPost("{id}/incLevel/{inc}")]
         public async Task<Player> IncPlayerLevel(Guid id, int inc)
         {
+            await ValidatePlayerId(id);
             return await _repo.IncPlayerLevel(id, inc);
         }
 
@@ -86,18 +88,21 @@ namespace MasterServer
         [HttpPost("{id}/addAchievement/{index}")]
         public async Task<Player> AddAchievement(Guid id, Achievement index)
         {
+            await ValidatePlayerId(id);
             return await _repo.AddAchievement(id, index);
         }
 
         [HttpGet("{id}/achievements")]
         public async Task<bool[]> GetAchievements(Guid id)
         {
+            await ValidatePlayerId(id);
             return await _repo.GetAchievements(id);
         }
 
         [HttpGet("{id}/achievementCount")]
         public async Task<int> GetAchievementCount(Guid id)
         {
+            await ValidatePlayerId(id);
             return await _repo.GetAchievementCount(id);
         }
 
@@ -119,10 +124,9 @@ namespace MasterServer
             return await _repo.GetTop10();
         }
 
-        private async Task ValidatePlayer(string id)
+        private async Task ValidatePlayerId(Guid id)
         {
-            //if(id.isvalidGuidblabla)
-           /// if (player == null || player.Id != id) throw new IdNotFoundException("Could not find player with ID: " + id);
+            if (!(await _repo.ValidatePlayerId(id))) throw new IdNotFoundException("Could not find player with ID: " + id);
         }
     }
 }

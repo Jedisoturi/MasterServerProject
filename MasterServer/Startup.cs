@@ -34,12 +34,13 @@ namespace MasterServer
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
 
-            app.UseErrorHandlingMiddleware();
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseErrorHandlingMiddleware();
+
             app.UseRouting();
 
             app.UseAuthorization();

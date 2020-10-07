@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.Extensions;
+﻿using MasterServer.ErrorHandling;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
 using System;
@@ -20,19 +21,19 @@ namespace MasterServer
             var request = context.HttpContext.Request;
 
             // Get timeStamp
-            if (!request.Headers.TryGetValue("TimeStamp", out StringValues timeStampValue)) throw new Exception($"No timeStamp provided");
+            if (!request.Headers.TryGetValue("TimeStamp", out StringValues timeStampValue)) throw new AppAuthenticationException($"No timeStamp provided");
             string timeStampString = timeStampValue.FirstOrDefault();
 
 
 
             // Check if timeout
-            if (!DateTime.TryParse(timeStampString, out DateTime timeStamp)) throw new Exception($"Invalid TimeStamp");
+            if (!DateTime.TryParse(timeStampString, out DateTime timeStamp)) throw new AppAuthenticationException($"Invalid TimeStamp");
             Console.WriteLine(timeStampString);
             Console.WriteLine(DateTime.UtcNow.ToString());
             if (timeStamp.AddMinutes(1) < DateTime.UtcNow) throw new Exception($"Request is too old");
 
             // Get signature
-            if (!request.Headers.TryGetValue("Signature", out StringValues signatureValue)) throw new Exception($"No signature provided");
+            if (!request.Headers.TryGetValue("Signature", out StringValues signatureValue)) throw new AppAuthenticationException($"No signature provided");
             string signature = signatureValue.FirstOrDefault();
 
             // Read url
@@ -46,7 +47,7 @@ namespace MasterServer
 
             // Check signature
             var mySignature = Encode(url + timeStampString + bodyString, Constants.secret);
-            if (mySignature != signature) throw new Exception($"Incorrect signature");
+            if (mySignature != signature) throw new AppAuthenticationException($"Incorrect signature");
 
             await base.OnActionExecutionAsync(context, next);
         }

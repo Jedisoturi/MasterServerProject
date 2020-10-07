@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using MasterServer.ErrorHandling;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -21,9 +22,13 @@ namespace MasterServer
 			}
 			catch (IdNotFoundException e)
 			{
-				string ex = e.ToString();
-				Console.WriteLine(ex);
-				context.Response.StatusCode = (int)HttpStatusCode.OK;
+				Console.WriteLine(e.Message);
+				context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+			}
+			catch (AppAuthenticationException e)
+            {
+				Console.WriteLine(e.Message);
+				context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
 			}
 		}
 		/*
