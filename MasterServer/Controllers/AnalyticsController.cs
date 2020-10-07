@@ -43,6 +43,7 @@ namespace MasterServer
                 return await _repo.GetAllPlayerIDsWithAnalytics(type);
             }
 
+            [AppAuthenticationFilter]
             [HttpPost("new/{type:int}")]
             public async Task<AnalyticEvent> NewEvent(EventType type, [FromBody] NewEvent inEvent)
             {

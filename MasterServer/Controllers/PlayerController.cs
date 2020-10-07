@@ -13,12 +13,11 @@ namespace MasterServer
     {
         private readonly ILogger<PlayerController> _logger;
         private readonly DBRepository _repo;
-        //Random rand;
+
         public PlayerController(ILogger<PlayerController> logger, DBRepository repo)
         {
             _logger = logger;
             _repo = repo;
-            //rand = new Random();
         }
 
         [HttpGet]
@@ -52,17 +51,16 @@ namespace MasterServer
         public async Task<Player> Create(string name = null)
         {
             if (name == null)
-                name = "Player" + (await _repo.GetSize() + 1); //rand.Next(1, Int32.MaxValue);
+                name = "Player" + (await _repo.GetSize() + 1);
             Player player = new Player();
             player.Id = Guid.NewGuid();
             player.Name = name;
             player.CreationTime = DateTime.Now;
 
-
-            int a = player.Achievements.Count(c => c == true);
             return await _repo.CreatePlayer(player);
         }
 
+        [AppAuthenticationFilter]
         [HttpPost("{id}/rename/{name}")]
         public async Task<Player> Rename(Guid id, string name)
         {
@@ -71,18 +69,21 @@ namespace MasterServer
             return await _repo.Rename(id, name);
         }
 
+        [AppAuthenticationFilter]
         [HttpPost("{id}/incScore/{inc}")]
         public async Task<Player> IncPlayerScore(Guid id, int inc)
         {
             return await _repo.IncPlayerScore(id, inc);
         }
 
+        [AppAuthenticationFilter]
         [HttpPost("{id}/incLevel/{inc}")]
         public async Task<Player> IncPlayerLevel(Guid id, int inc)
         {
             return await _repo.IncPlayerLevel(id, inc);
         }
 
+        [AppAuthenticationFilter]
         [HttpPost("{id}/addAchievement/{index}")]
         public async Task<Player> AddAchievement(Guid id, Achievement index)
         {
