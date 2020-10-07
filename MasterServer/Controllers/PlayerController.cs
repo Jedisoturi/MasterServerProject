@@ -13,12 +13,11 @@ namespace MasterServer
     {
         private readonly ILogger<PlayerController> _logger;
         private readonly DBRepository _repo;
-        //Random rand;
+
         public PlayerController(ILogger<PlayerController> logger, DBRepository repo)
         {
             _logger = logger;
             _repo = repo;
-            //rand = new Random();
         }
 
         [HttpGet]
@@ -52,14 +51,12 @@ namespace MasterServer
         public async Task<Player> Create(string name = null, string signature = null)
         {
             if (name == null)
-                name = "Player" + (await _repo.GetSize() + 1); //rand.Next(1, Int32.MaxValue);
+                name = "Player" + (await _repo.GetSize() + 1);
             Player player = new Player();
             player.Id = Guid.NewGuid();
             player.Name = name;
             player.CreationTime = DateTime.Now;
 
-
-            int a = player.Achievements.Count(c => c == true);
             return await _repo.CreatePlayer(player);
         }
 
