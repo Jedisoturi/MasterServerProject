@@ -43,7 +43,7 @@ namespace MasterServer.Controllers
 
         [AppAuthenticationFilter]
         [HttpPost("create")]
-        public async Task<ServerAndKey> Create([FromBody] NewServer newServer, string signature = null)
+        public async Task<ServerAndKey> Create([FromBody] NewServer newServer)
         {
             var server = new Server(
                 newServer.Name, 
@@ -63,8 +63,8 @@ namespace MasterServer.Controllers
         }
 
         [AppAuthenticationFilter]
-        [HttpDelete("{id:Guid}")]
-        public async Task<Server> Delete(Guid id, Guid? adminKey, string signature = null)
+        [HttpPost("{id:Guid}/delete")]
+        public async Task<Server> Delete(Guid id, Guid? adminKey)
         {
             await ValidateAdminKey(id, adminKey);
             await _repository.DeleteServerAdminKey(id);
@@ -73,7 +73,7 @@ namespace MasterServer.Controllers
 
         [AppAuthenticationFilter]
         [HttpPost("{serverId:Guid}/playerConnected/{playerId:Guid}")]
-        public async Task<Server> PlayerConnected(Guid serverId, Guid playerId, Guid? adminKey, string signature = null)
+        public async Task<Server> PlayerConnected(Guid serverId, Guid playerId, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.PlayerConnected(serverId, playerId);
@@ -81,7 +81,7 @@ namespace MasterServer.Controllers
 
         [AppAuthenticationFilter]
         [HttpPost("{serverId:Guid}/playerDisconnected/{playerId:Guid}")]
-        public async Task<Server> PlayerDisconnected(Guid serverId, Guid playerId, Guid? adminKey, string signature = null)
+        public async Task<Server> PlayerDisconnected(Guid serverId, Guid playerId, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.PlayerDisconnected(serverId, playerId);
@@ -89,7 +89,7 @@ namespace MasterServer.Controllers
 
         [AppAuthenticationFilter]
         [HttpPost("{serverId:Guid}/banPlayer/{playerId:Guid}")]
-        public async Task<Server> BanPlayer(Guid serverId, Guid playerId, Guid? adminKey, string signature = null)
+        public async Task<Server> BanPlayer(Guid serverId, Guid playerId, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.BanPlayer(serverId, playerId);
@@ -97,7 +97,7 @@ namespace MasterServer.Controllers
 
         [AppAuthenticationFilter]
         [HttpPost("{serverId:Guid}/unbanPlayer/{playerId:Guid}")]
-        public async Task<Server> UnbanPlayer(Guid serverId, Guid playerId, Guid? adminKey, string signature = null)
+        public async Task<Server> UnbanPlayer(Guid serverId, Guid playerId, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.UnbanPlayer(serverId, playerId);
@@ -117,7 +117,7 @@ namespace MasterServer.Controllers
 
         [AppAuthenticationFilter]
         [HttpPost("{serverId:Guid}/modifyName/{name}")]
-        public async Task<Server> ModifyName(Guid serverId, string name, Guid? adminKey, string signature = null)
+        public async Task<Server> ModifyName(Guid serverId, string name, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.ModifyServerName(serverId, name);
@@ -125,7 +125,7 @@ namespace MasterServer.Controllers
 
         [AppAuthenticationFilter]
         [HttpPost("{serverId:Guid}/modifyEndPoint/{endPoint}")]
-        public async Task<Server> ModifyEndPoint(Guid serverId, [ValidateIPEndPoint] string endPoint, Guid? adminKey, string signature = null)
+        public async Task<Server> ModifyEndPoint(Guid serverId, [ValidateIPEndPoint] string endPoint, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.ModifyServerEndPoint(serverId, endPoint);
@@ -133,7 +133,7 @@ namespace MasterServer.Controllers
 
         [AppAuthenticationFilter]
         [HttpPost("{serverId:Guid}/modifyMaxPlayers/{maxPlayers:int}")]
-        public async Task<Server> ModifyMaxPlayers(Guid serverId, int maxPlayers, Guid? adminKey, string signature = null)
+        public async Task<Server> ModifyMaxPlayers(Guid serverId, int maxPlayers, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.ModifyServerMaxPlayers(serverId, maxPlayers);
@@ -141,7 +141,7 @@ namespace MasterServer.Controllers
 
         [AppAuthenticationFilter]
         [HttpPost("{serverId:Guid}/modifyHasPassword/{hasPassword:bool}")]
-        public async Task<Server> ModifyHasPassword(Guid serverId, bool hasPassword, Guid? adminKey, string signature = null)
+        public async Task<Server> ModifyHasPassword(Guid serverId, bool hasPassword, Guid? adminKey)
         {
             await ValidateAdminKey(serverId, adminKey);
             return await _repository.ModifyServerHasPassword(serverId, hasPassword);

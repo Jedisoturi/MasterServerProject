@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -16,20 +17,26 @@ namespace MasterServer
     {
         public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
-            //string signature;
             var request = context.HttpContext.Request;
-            //request.Headers.TryGetValue("signature", out StringValues sv);
-            //string signature = sv.FirstOrDefault();
-            string signature = context.ActionArguments.SingleOrDefault(p => p.Key == "signature").Value.ToString();
 
-            if (signature == null) throw new Exception($"No signature provided");
+            // Get timeStamp
+            if (!request.Headers.TryGetValue("TimeStamp", out StringValues timeStampValue)) throw new Exception($"No timeStamp provided");
+            string timeStampString = timeStampValue.FirstOrDefault();
 
-            // Remove the signature parameter from the url
+
+
+            // Check if timeout
+            if (!DateTime.TryParse(timeStampString, out DateTime timeStamp)) throw new Exception($"Invalid TimeStamp");
+            Console.WriteLine(timeStampString);
+            Console.WriteLine(DateTime.UtcNow.ToString());
+            if (timeStamp.AddMinutes(1) < DateTime.UtcNow) throw new Exception($"Request is too old");
+
+            // Get signature
+            if (!request.Headers.TryGetValue("Signature", out StringValues signatureValue)) throw new Exception($"No signature provided");
+            string signature = signatureValue.FirstOrDefault();
+
+            // Read url
             var url = request.GetEncodedUrl();
-            int indexQuestionmark = url.LastIndexOf("?");
-            int indexAnd = url.LastIndexOf("&");
-            int index = indexAnd != -1 ? indexAnd : indexQuestionmark;
-            url = url.Substring(0, index);  // TODO: remove check
 
             // Read body as json
             var body = new StreamReader(request.Body);
@@ -38,7 +45,7 @@ namespace MasterServer
             var bodyString = (await body.ReadToEndAsync()).ToLower();
 
             // Check signature
-            var mySignature = Encode(url + bodyString, Constants.secret);
+            var mySignature = Encode(url + timeStampString + bodyString, Constants.secret);
             if (mySignature != signature) throw new Exception($"Incorrect signature");
 
             await base.OnActionExecutionAsync(context, next);

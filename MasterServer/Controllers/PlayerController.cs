@@ -49,7 +49,7 @@ namespace MasterServer
         
         [AppAuthenticationFilter]
         [HttpPost("create")]
-        public async Task<Player> Create(string name = null, string signature = null)
+        public async Task<Player> Create(string name = null)
         {
             if (name == null)
                 name = "Player" + (await _repo.GetSize() + 1); //rand.Next(1, Int32.MaxValue);
