@@ -60,6 +60,7 @@ namespace MasterServer
             return await _repo.CreatePlayer(player);
         }
 
+        [AppAuthenticationFilter]
         [HttpPost("{id}/rename/{name}")]
         public async Task<Player> Rename(Guid id, string name)
         {
@@ -68,18 +69,21 @@ namespace MasterServer
             return await _repo.Rename(id, name);
         }
 
+        [AppAuthenticationFilter]
         [HttpPost("{id}/incScore/{inc}")]
         public async Task<Player> IncPlayerScore(Guid id, int inc)
         {
             return await _repo.IncPlayerScore(id, inc);
         }
 
+        [AppAuthenticationFilter]
         [HttpPost("{id}/incLevel/{inc}")]
         public async Task<Player> IncPlayerLevel(Guid id, int inc)
         {
             return await _repo.IncPlayerLevel(id, inc);
         }
 
+        [AppAuthenticationFilter]
         [HttpPost("{id}/addAchievement/{index}")]
         public async Task<Player> AddAchievement(Guid id, Achievement index)
         {
